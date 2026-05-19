@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日麻算点工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <button class="yaku-list-btn" id="yaku-list-btn">📋 役種一覧</button>
+  <h1>日麻算点工具</h1>
+
+  <!-- 牌池区域 -->
+  <div class="pool-section">
+    <h2>牌池 — 点击加入手牌</h2>
+    <div id="pool-container"></div>
+  </div>
+
+  <!-- 宝牌表示牌区域 -->
+  <div class="dora-section">
+    <div class="dora-panels">
+      <!-- 表宝牌 -->
+      <div class="dora-panel">
+        <div class="dora-header">
+          <h2>表宝牌表示牌</h2>
+          <button class="dora-mode-btn" id="dora-mode-btn">選択</button>
+        </div>
+        <div class="dora-indicators" id="dora-indicators">
+          <span class="placeholder">点击上方按钮后，在牌池中选择</span>
+        </div>
+      </div>
+      <!-- 裏宝牌 -->
+      <div class="dora-panel">
+        <div class="dora-header">
+          <h2>裏宝牌表示牌</h2>
+          <button class="dora-mode-btn" id="ura-dora-mode-btn">選択</button>
+        </div>
+        <div class="dora-indicators" id="ura-dora-indicators">
+          <span class="placeholder">立直后和牌时，额外开示</span>
+        </div>
+      </div>
+    </div>
+    <div class="dora-result" id="dora-result"></div>
+  </div>
+
+  <!-- 局况设置 -->
+  <div class="settings-row">
+    <span class="setting-label">身份:</span>
+    <label class="radio-label"><input type="radio" name="oyako" value="oya" checked> 親家</label>
+    <label class="radio-label"><input type="radio" name="oyako" value="ko"> 子家</label>
+    <span class="setting-label" style="margin-left:12px">連荘:</span>
+    <input type="number" class="renchan-input" id="renchan" value="0" min="0" max="99">
+    <span class="setting-unit">本</span>
+    <span class="setting-label" style="margin-left:12px">場風:</span>
+    <select class="setting-select" id="bakaze">
+      <option value="east">東</option><option value="south">南</option>
+      <option value="west">西</option><option value="north">北</option>
+    </select>
+    <span class="setting-label" style="margin-left:8px">自風:</span>
+    <select class="setting-select" id="jikaze">
+      <option value="east">東</option><option value="south">南</option>
+      <option value="west">西</option><option value="north">北</option>
+    </select>
+  </div>
+
+  <!-- 手牌区 + 副露区（左右并列） -->
+  <div class="hand-meld-row">
+    <div class="hand-section">
+      <h2>手牌 <span class="sub-text" id="hand-count">(0/13 张)</span></h2>
+      <div class="tile-area" id="hand-area"></div>
+      <div class="hand-error" id="hand-error"></div>
+    </div>
+    <div class="meld-section">
+      <h2>副露 <span class="sub-text" id="meld-count">(0 张)</span></h2>
+      <div class="meld-btns">
+        <button class="meld-btn" id="meld-ponchi">碰/吃</button>
+        <button class="meld-btn" id="meld-minkan">明槓</button>
+        <button class="meld-btn" id="meld-ankan">暗槓</button>
+      </div>
+      <div class="meld-selection-preview" id="meld-selection-preview"></div>
+      <div class="meld-display" id="meld-area"></div>
+    </div>
+  </div>
+
+  <!-- 和牌区 -->
+  <div class="win-section">
+    <h2>和牌 <span class="sub-text" id="win-count">(0/1 张)</span></h2>
+    <div class="tile-area win-area" id="win-area"></div>
+  </div>
+
+  <!-- 特殊役选项 -->
+  <div class="settings-row yaku-options">
+    <label class="checkbox-label"><input type="checkbox" id="riichi-flag"> 立直</label>
+    <label class="checkbox-label"><input type="checkbox" id="ippatsu-flag"> 一発</label>
+    <label class="checkbox-label"><input type="checkbox" id="double-riichi-flag"> 両立直</label>
+    <label class="checkbox-label"><input type="checkbox" id="rinshan-flag"> 嶺上開花</label>
+    <label class="checkbox-label"><input type="checkbox" id="haitei-flag"> 海底撈月</label>
+    <label class="checkbox-label"><input type="checkbox" id="houtei-flag"> 河底撈魚</label>
+    <label class="checkbox-label"><input type="checkbox" id="tenhou-flag"> 天和</label>
+    <label class="checkbox-label"><input type="checkbox" id="chiihou-flag"> 地和</label>
+    <label class="checkbox-label"><input type="checkbox" id="chankan-flag"> 搶槓</label>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="action-section">
+    <button class="btn btn-tsumo" id="btn-tsumo">自摸</button>
+    <button class="btn btn-ron" id="btn-ron">荣和</button>
+    <button class="btn btn-clear" id="btn-clear">清空</button>
+  </div>
+
+  <!-- 结果显示区 -->
+  <div class="result-section" id="result-panel" style="display:none">
+    <h2>计算结果</h2>
+    <div class="result-grid">
+      <div class="result-box">
+        <h3>役种列表</h3>
+        <div id="yaku-list"></div>
+        <div id="total-han" style="margin-top:6px;font-weight:bold;color:#e8c040"></div>
+      </div>
+      <div class="result-box">
+        <h3>符数明细</h3>
+        <div id="fu-detail"></div>
+      </div>
+      <div class="result-box">
+        <h3>点数表</h3>
+        <div id="points-big" class="points-big"></div>
+        <div id="points-detail" class="points-detail"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 役种一览悬浮窗 -->
+<div class="modal-overlay" id="yaku-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>役種一覧</h2>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
