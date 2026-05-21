@@ -38,6 +38,10 @@ function meldPhysicalTiles() { return meldGroups.flatMap(g => g.tiles); }
 // ============ 辅助函数 ============
 function getEmoji(sid, n) { return SUITS.find(x => x.id === sid).emoji[n - 1]; }
 function getTileName(sid, n) { return SUITS.find(x => x.id === sid).tiles[n - 1]; }
+function getTileSvgSrc(suit, num, isAka) { return 'svg/' + (isAka ? '0' : num) + suit + '.svg'; }
+function createTileImg(suit, num, isAka) {
+  return '<img src="' + getTileSvgSrc(suit, num, isAka) + '" alt="' + getTileName(suit, num) + '" class="tile-svg">';
+}
 function tileSort(a, b) { const o = { m: 0, p: 1, s: 2, z: 3 }; return o[a.suit] - o[b.suit] || a.num - b.num; }
 function tileEq(a, b) { return a.suit === b.suit && a.num === b.num; }
 function tileKey(s, n) { return s + '-' + n; }
@@ -93,7 +97,7 @@ function renderPool() {
         if (doraMode || meldMode) btn.classList.add('dora-selectable');
         if (meldMode && meldSelectedKeys.has(key)) btn.classList.add('meld-selected');
         const remaining = tileRemaining(suit.id, num, isAka);
-        btn.textContent = suit.emoji[n];
+        btn.innerHTML = createTileImg(suit.id, num, isAka);
         btn.title = suit.tiles[n] + (isAka ? ' (赤宝牌)' : '') + ' 残' + remaining + '枚';
         if (remaining <= 0) {
           btn.classList.add('exhausted');
@@ -130,7 +134,7 @@ function renderHand() {
     el.className = 'hand-tile';
     if (t.isAkadora) el.classList.add('akadora');
     if (isDora(t.suit, t.num)) el.classList.add('is-dora');
-    el.textContent = getEmoji(t.suit, t.num);
+    el.innerHTML = createTileImg(t.suit, t.num, t.isAkadora);
     el.title = getTileName(t.suit, t.num) + (t.isAkadora ? ' [赤]' : '') + (isDora(t.suit, t.num) ? ' [宝牌]' : '');
     el.addEventListener('click', () => {
       freeTile(t.suit, t.num, t.isAkadora);
@@ -152,12 +156,12 @@ function renderDoraIndicators() {
       const dora = getDoraTile(ind.suit, ind.num);
       const w = document.createElement('div'); w.className = 'dora-indicator';
       const it = document.createElement('div'); it.className = 'indicator-tile';
-      it.textContent = getEmoji(ind.suit, ind.num);
+      it.innerHTML = createTileImg(ind.suit, ind.num, false);
       it.title = '表示牌: ' + getTileName(ind.suit, ind.num) + ' (点击删除)';
       it.addEventListener('click', () => { freeTile(ind.suit, ind.num, false); doraIndicators.splice(i, 1); renderDoraIndicators(); renderDoraResult(); renderHand(); renderWinningTile(); renderPool(); });
       const ar = document.createElement('span'); ar.className = 'arrow'; ar.textContent = '→';
       const dt = document.createElement('div'); dt.className = 'dora-tile';
-      dt.textContent = getEmoji(dora.suit, dora.num); dt.title = '宝牌: ' + getTileName(dora.suit, dora.num);
+      dt.innerHTML = createTileImg(dora.suit, dora.num, false); dt.title = '宝牌: ' + getTileName(dora.suit, dora.num);
       w.appendChild(it); w.appendChild(ar); w.appendChild(dt); area.appendChild(w);
     });
   }
@@ -174,7 +178,7 @@ function renderUraDoraIndicators() {
       const dora = getDoraTile(ind.suit, ind.num);
       const w = document.createElement('div'); w.className = 'dora-indicator';
       const it = document.createElement('div'); it.className = 'indicator-tile';
-      it.textContent = getEmoji(ind.suit, ind.num);
+      it.innerHTML = createTileImg(ind.suit, ind.num, false);
       it.title = '裏表示牌: ' + getTileName(ind.suit, ind.num) + ' (点击删除)';
       it.addEventListener('click', () => {
         freeTile(ind.suit, ind.num, false);
@@ -183,7 +187,7 @@ function renderUraDoraIndicators() {
       });
       const ar = document.createElement('span'); ar.className = 'arrow'; ar.textContent = '→';
       const dt = document.createElement('div'); dt.className = 'dora-tile';
-      dt.textContent = getEmoji(dora.suit, dora.num);
+      dt.innerHTML = createTileImg(dora.suit, dora.num, false);
       dt.title = '裏宝牌: ' + getTileName(dora.suit, dora.num);
       w.appendChild(it); w.appendChild(ar); w.appendChild(dt); area.appendChild(w);
     });
@@ -245,7 +249,7 @@ function renderMelds() {
       if (ti === g.calledFrom) el.classList.add('called');
       if (g.type === 'ankan') el.classList.add('ankan-tile');
       if (t.isAkadora) el.classList.add('akadora');
-      el.textContent = getEmoji(t.suit, t.num);
+      el.innerHTML = createTileImg(t.suit, t.num, t.isAkadora);
       el.title = getTileName(t.suit, t.num)
         + (t.isAkadora ? ' [赤]' : '')
         + (ti === g.calledFrom ? ' (他家打)' : '');
@@ -276,7 +280,7 @@ function renderWinningTile() {
     el.className = 'win-tile';
     if (winningTile.isAkadora) el.classList.add('akadora');
     if (isDora(winningTile.suit, winningTile.num)) el.classList.add('is-dora');
-    el.textContent = getEmoji(winningTile.suit, winningTile.num);
+    el.innerHTML = createTileImg(winningTile.suit, winningTile.num, winningTile.isAkadora);
     el.title = getTileName(winningTile.suit, winningTile.num)
       + (winningTile.isAkadora ? ' [赤]' : '')
       + (isDora(winningTile.suit, winningTile.num) ? ' [宝牌]' : '')
@@ -349,7 +353,7 @@ function renderMeldPreview() {
     return;
   }
   preview.classList.add('show');
-  const emojis = meldSelection.map(t => getEmoji(t.suit, t.num)).join(' ');
+  const emojis = meldSelection.map(t => createTileImg(t.suit, t.num, t.isAkadora)).join('');
   let typeHtml = '';
   if (meldMode === 'ponchi' && meldSelection.length === 3) {
     const detected = detectPonchiType(meldSelection);
@@ -1377,7 +1381,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   const uraBtn = document.getElementById('ura-dora-mode-btn');
   omoteBtn.classList.remove('active'); omoteBtn.textContent = '選択';
   uraBtn.classList.remove('active'); uraBtn.textContent = '選択';
-  renderHand(); renderMelds(); renderWinningTile(); renderDoraIndicators(); renderUraDoraIndicators(); renderDoraResult(); updateButtonStates();
+  renderHand(); renderMelds(); renderWinningTile(); renderDoraIndicators(); renderUraDoraIndicators(); renderDoraResult(); renderPool(); updateButtonStates();
   const panel = document.getElementById('result-panel');
   if (panel) panel.classList.remove('show');
 });

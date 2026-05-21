@@ -571,13 +571,9 @@ h3 {
   border-color: #f39c12;
 }
 
-.hand-tile.is-dora::after {
-  content: '★';
-  position: absolute;
-  top: -6px;
-  right: -4px;
-  font-size: 0.5em;
-  color: #ffd700;
+.win-tile.is-dora {
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.6);
+  border-color: #f39c12;
 }
 
 /* ===== 副露 ===== */
@@ -825,4 +821,52 @@ h3 {
   color: #e74c3c;
   font-size: 0.85em;
   margin-top: 4px;
+}
+
+/* ===== SVG 牌图片 ===== */
+.tile-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+}
+
+/* 牌池按钮中 SVG 尺寸微调 */
+.tile-btn .tile-svg {
+  width: 38px;
+  height: 52px;
+}
+
+/* 手牌中 SVG 尺寸微调 */
+.hand-tile .tile-svg {
+  width: 38px;
+  height: 52px;
+}
+
+/* 和牌中 SVG 尺寸微调 */
+.win-tile .tile-svg {
+  width: 38px;
+  height: 52px;
+}
+
+/* 副露牌中 SVG 尺寸微调 */
+.meld-tile .tile-svg {
+  width: 28px;
+  height: 40px;
+}
+
+/* 宝牌表示牌中 SVG 尺寸微调 */
+.indicator-tile .tile-svg,
+.dora-tile .tile-svg {
+  width: 32px;
+  height: 44px;
+}
+
+/* 副露预览中 SVG 尺寸微调 */
+.meld-selection-preview .tile-svg {
+  width: 28px;
+  height: 38px;
+  display: inline-block;
+  vertical-align: middle;
 }
