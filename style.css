@@ -1,0 +1,828 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Yu Gothic', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  background: #1a1a2e;
+  color: #e0d8c0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.container {
+  width: 100%;
+  max-width: 860px;
+  position: relative;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.8em;
+  color: #d4a574;
+  margin-bottom: 20px;
+  letter-spacing: 0.08em;
+}
+
+h2 {
+  font-size: 1.05em;
+  color: #bf8f60;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #2a3a5c;
+}
+
+h3 {
+  font-size: 0.95em;
+  color: #a08070;
+  margin-bottom: 6px;
+}
+
+.sub-text {
+  font-size: 0.75em;
+  color: #8899aa;
+  font-weight: normal;
+}
+
+.placeholder {
+  color: #445566;
+  font-size: 0.9em;
+}
+
+/* ===== 役种一览按钮 ===== */
+.yaku-list-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px 14px;
+  font-size: 0.85em;
+  background: #2a1a5a;
+  color: #c0a0e0;
+  border: 1px solid #5a3090;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.yaku-list-btn:hover {
+  background: #3a2a70;
+  border-color: #8b60c0;
+}
+
+/* ===== 悬浮窗 ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-content {
+  background: #16213e;
+  border: 2px solid #3a3060;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #2a3a5c;
+}
+
+.modal-header h2 {
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: #d4a574;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5em;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.modal-close:hover { color: #e74c3c; }
+
+.modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.yaku-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.yaku-table th {
+  text-align: left;
+  padding: 6px 10px;
+  background: #1a2a44;
+  color: #c4956a;
+  border-bottom: 1px solid #2a3a5c;
+  font-size: 0.95em;
+}
+
+.yaku-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #1a2a44;
+  color: #c0c8d0;
+}
+
+.yaku-table .han-col {
+  color: #e8c040;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.yaku-table tr:hover td {
+  background: #1a2a44;
+}
+
+/* ===== 牌池 ===== */
+.pool-section {
+  margin-bottom: 16px;
+}
+
+.pool-suit {
+  margin-bottom: 10px;
+}
+
+.suit-label {
+  display: inline-block;
+  font-size: 0.85em;
+  color: #908070;
+  min-width: 48px;
+  margin-right: 6px;
+}
+
+.tile-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+.tile-btn {
+  width: 46px;
+  height: 62px;
+  font-size: 1.5em;
+  border: 2px solid #2a3a5c;
+  border-radius: 6px;
+  background: #0f3460;
+  color: #e8e0d0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+}
+
+.tile-btn:hover {
+  background: #1a5080;
+  border-color: #d4a574;
+  transform: translateY(-2px);
+}
+
+/* 赤宝牌 */
+.tile-btn.akadora {
+  background: #4a1525;
+  border-color: #c0392b;
+  color: #ff9999;
+}
+
+.tile-btn.akadora:hover {
+  background: #6a1a30;
+  border-color: #e74c3c;
+}
+
+/* 宝牌表示牌选择模式 */
+.tile-btn.dora-selectable {
+  border-color: #f39c12;
+  box-shadow: 0 0 6px rgba(243, 156, 18, 0.4);
+}
+
+.tile-btn.dora-selectable:hover {
+  border-color: #f1c40f;
+  background: #3a2a0a;
+}
+
+.tile-btn.meld-selected {
+  background: #2a4a1a !important;
+  border-color: #5a9a3a !important;
+  box-shadow: 0 0 6px rgba(90, 154, 58, 0.4);
+}
+
+.tile-btn.exhausted {
+  background: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+  color: #444 !important;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tile-btn.exhausted:hover {
+  background: #1a1a1a !important;
+  border-color: #2a2a2a !important;
+  transform: none;
+}
+
+.tile-btn.akadora.exhausted {
+  background: #1a1015 !important;
+  border-color: #2a1a20 !important;
+  color: #442222 !important;
+}
+
+/* ===== 宝牌表示牌区域 ===== */
+.dora-section {
+  margin-bottom: 16px;
+}
+
+.dora-panels {
+  display: flex;
+  gap: 16px;
+}
+
+.dora-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.dora-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dora-header h2 {
+  margin-bottom: 0;
+  padding-bottom: 4px;
+  font-size: 0.95em;
+}
+
+.dora-mode-btn {
+  padding: 4px 14px;
+  font-size: 0.85em;
+  background: #2a1a5a;
+  color: #c0a0e0;
+  border: 1px solid #5a3090;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.dora-mode-btn:hover {
+  background: #3a2a70;
+}
+
+.dora-mode-btn:disabled {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+  color: #555;
+  cursor: not-allowed;
+}
+
+.dora-mode-btn:disabled:hover {
+  background: #2a2a2a;
+}
+
+.dora-mode-btn.active {
+  background: #8b6914;
+  border-color: #f39c12;
+  color: #ffd700;
+}
+
+/* ===== 局况设置 ===== */
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #0d1b36;
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+.setting-label {
+  color: #908070;
+}
+
+.radio-label {
+  color: #c0b8a8;
+  cursor: pointer;
+}
+
+.radio-label input {
+  accent-color: #d4a574;
+  margin-right: 3px;
+}
+
+.renchan-input {
+  width: 48px;
+  padding: 3px 6px;
+  background: #0f3460;
+  color: #e8e0d0;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.renchan-input:focus {
+  outline: none;
+  border-color: #d4a574;
+}
+
+.setting-unit {
+  color: #908070;
+  font-size: 0.85em;
+}
+
+.setting-select {
+  padding: 2px 6px;
+  background: #0f3460;
+  color: #e8e0d0;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85em;
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: #d4a574;
+}
+
+.checkbox-label {
+  color: #c0b8a8;
+  cursor: pointer;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.checkbox-label input {
+  accent-color: #d4a574;
+  margin-right: 2px;
+}
+
+.checkbox-label.disabled {
+  color: #555;
+  cursor: not-allowed;
+}
+
+.checkbox-label.disabled input {
+  accent-color: #555;
+  cursor: not-allowed;
+}
+
+.yaku-options {
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.dora-indicators {
+  min-height: 56px;
+  background: #0d1b36;
+  border: 2px dashed #2a3a5c;
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.dora-indicator {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dora-indicator .indicator-tile {
+  width: 40px;
+  height: 54px;
+  font-size: 1.25em;
+  background: #1a3a20;
+  border: 2px solid #2a6040;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dora-indicator .indicator-tile:hover {
+  background: #6a2020;
+  border-color: #c0392b;
+}
+
+.dora-indicator .arrow {
+  font-size: 0.7em;
+  color: #f39c12;
+}
+
+.dora-indicator .dora-tile {
+  width: 40px;
+  height: 54px;
+  font-size: 1.25em;
+  background: #3a2a0a;
+  border: 2px solid #f39c12;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 6px rgba(243, 156, 18, 0.3);
+}
+
+.dora-result {
+  margin-top: 4px;
+  font-size: 0.85em;
+  color: #e8c040;
+}
+
+/* ===== 手牌 & 副露 & 和牌区域 ===== */
+.hand-meld-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hand-meld-row .hand-section {
+  flex: 1.2;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.hand-meld-row .meld-section {
+  flex: 0.8;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.hand-section,
+.meld-section,
+.win-section {
+  margin-bottom: 16px;
+}
+
+.tile-area {
+  min-height: 68px;
+  background: #0d1b36;
+  border: 2px dashed #2a3a5c;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* 手牌中的牌 */
+.hand-tile {
+  width: 46px;
+  height: 62px;
+  font-size: 1.5em;
+  background: #1a3a5c;
+  border: 2px solid #2a5078;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+}
+
+.hand-tile:hover {
+  background: #8b2020;
+  border-color: #c0392b;
+}
+
+/* 和牌 */
+.win-area {
+  border-color: #d4a574 !important;
+  min-height: 68px;
+}
+
+.win-tile {
+  width: 46px;
+  height: 62px;
+  font-size: 1.5em;
+  background: #2a3a1a;
+  border: 2px solid #d4a574;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(212, 165, 116, 0.4);
+}
+
+.win-tile:hover {
+  background: #6a2020;
+  border-color: #c0392b;
+}
+
+.win-tile.akadora {
+  background: #4a1525;
+  border-color: #c0392b;
+  color: #ff9999;
+}
+
+/* 手牌中的赤宝牌 */
+.hand-tile.akadora {
+  background: #4a1525;
+  border-color: #c0392b;
+  color: #ff9999;
+}
+
+/* 手牌中的宝牌（根据表示牌命中） */
+.hand-tile.is-dora {
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.6);
+  border-color: #f39c12;
+}
+
+.hand-tile.is-dora::after {
+  content: '★';
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  font-size: 0.5em;
+  color: #ffd700;
+}
+
+/* ===== 副露 ===== */
+.meld-btns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.meld-btn {
+  padding: 3px 10px;
+  font-size: 0.8em;
+  background: #2a2a3a;
+  color: #b0a890;
+  border: 1px solid #3a3a4a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+
+.meld-btn:hover { background: #3a3a50; }
+
+.meld-btn.active {
+  background: #8b6914;
+  border-color: #d4a574;
+  color: #fff;
+}
+
+/* 点击反馈闪烁 */
+@keyframes tile-flash {
+  0%   { background: #2a5a2a; border-color: #5a9a3a; }
+  100% { background: inherit; border-color: inherit; }
+}
+
+.tile-btn.flash {
+  animation: tile-flash 0.3s ease-out;
+}
+
+.meld-selection-preview {
+  display: none;
+  min-height: 20px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  font-size: 0.8em;
+  color: #c0a060;
+  background: #1a2a0a;
+  border-radius: 4px;
+}
+
+.meld-selection-preview.show {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.meld-selection-preview .preview-tile {
+  font-size: 1.3em;
+  display: inline-block;
+}
+
+.meld-selection-preview .preview-type {
+  color: #e8c040;
+  font-weight: bold;
+}
+
+.preview-clear-btn {
+  background: #5a2020;
+  color: #e08080;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85em;
+  padding: 1px 6px;
+  line-height: 1.2;
+  font-family: inherit;
+  margin-right: 4px;
+}
+
+.preview-clear-btn:hover {
+  background: #8b2020;
+  color: #ff9999;
+}
+
+.meld-display {
+  min-height: 52px;
+  background: #0d1b36;
+  border: 2px dashed #2a3a5c;
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.meld-group {
+  display: inline-flex;
+  gap: 1px;
+  background: #2a1a0a;
+  border: 2px solid #5a4030;
+  border-radius: 5px;
+  padding: 2px 4px;
+  align-items: center;
+}
+
+.meld-group .meld-label {
+  font-size: 0.6em;
+  color: #a08060;
+  margin-right: 2px;
+}
+
+.meld-group .meld-tile {
+  width: 34px;
+  height: 48px;
+  font-size: 1.1em;
+  background: #3a2a1a;
+  border: 1px solid #5a4030;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meld-group .meld-tile.called {
+  border-color: #e74c3c;
+  box-shadow: 0 0 3px rgba(231, 76, 60, 0.4);
+}
+
+.meld-group .meld-tile.ankan-tile {
+  border-color: #8b6914;
+  background: #2a2a0a;
+}
+
+.meld-group .meld-tile.akadora {
+  background: #4a1525 !important;
+  border-color: #c0392b !important;
+  color: #ff9999;
+}
+
+/* ===== 按钮 ===== */
+.action-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 1.1em;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.btn-tsumo {
+  background: #2d6a4f;
+  color: #e8e8e8;
+}
+
+.btn-tsumo:hover {
+  background: #40916c;
+}
+
+.btn-ron {
+  background: #9b2226;
+  color: #e8e8e8;
+}
+
+.btn-ron:hover {
+  background: #c1121f;
+}
+
+.btn-clear {
+  flex: 0.4;
+  background: #444;
+  color: #aaa;
+}
+
+.btn-clear:hover {
+  background: #666;
+}
+
+/* ===== 结果区域 ===== */
+.result-section {
+  margin-top: 8px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.result-box {
+  background: #0d1b36;
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 100px;
+}
+
+.result-box .empty {
+  color: #556;
+  font-size: 0.85em;
+}
+
+.result-section.show {
+  display: block !important;
+}
+
+.yaku-item {
+  font-size: 0.9em;
+  padding: 2px 0;
+}
+
+.yaku-item .name {
+  color: #d4a574;
+}
+
+.yaku-item .han {
+  color: #e8c040;
+  margin-left: 6px;
+}
+
+.points-big {
+  font-size: 2em;
+  color: #e8c040;
+  text-align: center;
+}
+
+.points-detail {
+  font-size: 0.9em;
+  color: #a0b0c0;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.hand-error {
+  color: #e74c3c;
+  font-size: 0.85em;
+  margin-top: 4px;
+}
