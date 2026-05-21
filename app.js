@@ -38,6 +38,10 @@ function meldPhysicalTiles() { return meldGroups.flatMap(g => g.tiles); }
 // ============ 辅助函数 ============
 function getEmoji(sid, n) { return SUITS.find(x => x.id === sid).emoji[n - 1]; }
 function getTileName(sid, n) { return SUITS.find(x => x.id === sid).tiles[n - 1]; }
+function getTileSvgSrc(suit, num, isAka) { return 'svg/' + (isAka ? '0' : num) + suit + '.svg'; }
+function createTileImg(suit, num, isAka) {
+  return '<img src="' + getTileSvgSrc(suit, num, isAka) + '" alt="' + getTileName(suit, num) + '" class="tile-svg">';
+}
 function tileSort(a, b) { const o = { m: 0, p: 1, s: 2, z: 3 }; return o[a.suit] - o[b.suit] || a.num - b.num; }
 function tileEq(a, b) { return a.suit === b.suit && a.num === b.num; }
 function tileKey(s, n) { return s + '-' + n; }
@@ -93,7 +97,7 @@ function renderPool() {
         if (doraMode || meldMode) btn.classList.add('dora-selectable');
         if (meldMode && meldSelectedKeys.has(key)) btn.classList.add('meld-selected');
         const remaining = tileRemaining(suit.id, num, isAka);
-        btn.textContent = suit.emoji[n];
+        btn.innerHTML = createTileImg(suit.id, num, isAka);
         btn.title = suit.tiles[n] + (isAka ? ' (赤宝牌)' : '') + ' 残' + remaining + '枚';
         if (remaining <= 0) {
           btn.classList.add('exhausted');
@@ -130,7 +134,7 @@ function renderHand() {
     el.className = 'hand-tile';
     if (t.isAkadora) el.classList.add('akadora');
     if (isDora(t.suit, t.num)) el.classList.add('is-dora');
-    el.textContent = getEmoji(t.suit, t.num);
+    el.innerHTML = createTileImg(t.suit, t.num, t.isAkadora);
     el.title = getTileName(t.suit, t.num) + (t.isAkadora ? ' [赤]' : '') + (isDora(t.suit, t.num) ? ' [宝牌]' : '');
     el.addEventListener('click', () => {
       freeTile(t.suit, t.num, t.isAkadora);
@@ -152,12 +156,12 @@ function renderDoraIndicators() {
       const dora = getDoraTile(ind.suit, ind.num);
       const w = document.createElement('div'); w.className = 'dora-indicator';
       const it = document.createElement('div'); it.className = 'indicator-tile';
-      it.textContent = getEmoji(ind.suit, ind.num);
+      it.innerHTML = createTileImg(ind.suit, ind.num, false);
       it.title = '表示牌: ' + getTileName(ind.suit, ind.num) + ' (点击删除)';
       it.addEventListener('click', () => { freeTile(ind.suit, ind.num, false); doraIndicators.splice(i, 1); renderDoraIndicators(); renderDoraResult(); renderHand(); renderWinningTile(); renderPool(); });
       const ar = document.createElement('span'); ar.className = 'arrow'; ar.textContent = '→';
       const dt = document.createElement('div'); dt.className = 'dora-tile';
-      dt.textContent = getEmoji(dora.suit, dora.num); dt.title = '宝牌: ' + getTileName(dora.suit, dora.num);
+      dt.innerHTML = createTileImg(dora.suit, dora.num, false); dt.title = '宝牌: ' + getTileName(dora.suit, dora.num);
       w.appendChild(it); w.appendChild(ar); w.appendChild(dt); area.appendChild(w);
     });
   }
@@ -174,7 +178,7 @@ function renderUraDoraIndicators() {
       const dora = getDoraTile(ind.suit, ind.num);
       const w = document.createElement('div'); w.className = 'dora-indicator';
       const it = document.createElement('div'); it.className = 'indicator-tile';
-      it.textContent = getEmoji(ind.suit, ind.num);
+      it.innerHTML = createTileImg(ind.suit, ind.num, false);
       it.title = '裏表示牌: ' + getTileName(ind.suit, ind.num) + ' (点击删除)';
       it.addEventListener('click', () => {
         freeTile(ind.suit, ind.num, false);
@@ -183,7 +187,7 @@ function renderUraDoraIndicators() {
       });
       const ar = document.createElement('span'); ar.className = 'arrow'; ar.textContent = '→';
       const dt = document.createElement('div'); dt.className = 'dora-tile';
-      dt.textContent = getEmoji(dora.suit, dora.num);
+      dt.innerHTML = createTileImg(dora.suit, dora.num, false);
       dt.title = '裏宝牌: ' + getTileName(dora.suit, dora.num);
       w.appendChild(it); w.appendChild(ar); w.appendChild(dt); area.appendChild(w);
     });
@@ -245,7 +249,7 @@ function renderMelds() {
       if (ti === g.calledFrom) el.classList.add('called');
       if (g.type === 'ankan') el.classList.add('ankan-tile');
       if (t.isAkadora) el.classList.add('akadora');
-      el.textContent = getEmoji(t.suit, t.num);
+      el.innerHTML = createTileImg(t.suit, t.num, t.isAkadora);
       el.title = getTileName(t.suit, t.num)
         + (t.isAkadora ? ' [赤]' : '')
         + (ti === g.calledFrom ? ' (他家打)' : '');
@@ -276,7 +280,7 @@ function renderWinningTile() {
     el.className = 'win-tile';
     if (winningTile.isAkadora) el.classList.add('akadora');
     if (isDora(winningTile.suit, winningTile.num)) el.classList.add('is-dora');
-    el.textContent = getEmoji(winningTile.suit, winningTile.num);
+    el.innerHTML = createTileImg(winningTile.suit, winningTile.num, winningTile.isAkadora);
     el.title = getTileName(winningTile.suit, winningTile.num)
       + (winningTile.isAkadora ? ' [赤]' : '')
       + (isDora(winningTile.suit, winningTile.num) ? ' [宝牌]' : '')
@@ -349,7 +353,7 @@ function renderMeldPreview() {
     return;
   }
   preview.classList.add('show');
-  const emojis = meldSelection.map(t => getEmoji(t.suit, t.num)).join(' ');
+  const emojis = meldSelection.map(t => createTileImg(t.suit, t.num, t.isAkadora)).join('');
   let typeHtml = '';
   if (meldMode === 'ponchi' && meldSelection.length === 3) {
     const detected = detectPonchiType(meldSelection);
@@ -621,6 +625,98 @@ function decomposeMelds(tiles) {
   return allResults.length > 0 ? allResults : null;
 }
 
+// ---- 特殊和牌形: 七対子 ----
+function detectChiitoitsu(handTilesRaw, winningTile) {
+  const allTiles = [...handTilesRaw];
+  if (winningTile) allTiles.push(winningTile);
+  if (allTiles.length !== 14) return null;
+
+  const groups = {};
+  for (const t of allTiles) {
+    const k = tileKey(t.suit, t.num);
+    groups[k] = (groups[k] || 0) + 1;
+  }
+
+  const keys = Object.keys(groups);
+  if (keys.length !== 7) return null;
+  if (!keys.every(k => groups[k] === 2)) return null;
+
+  return { type: 'chiitoitsu' };
+}
+
+// ---- 特殊和牌形: 国士無双 ----
+const KOKUSHI_TILES = [
+  { suit: 'm', num: 1 }, { suit: 'm', num: 9 },
+  { suit: 'p', num: 1 }, { suit: 'p', num: 9 },
+  { suit: 's', num: 1 }, { suit: 's', num: 9 },
+  { suit: 'z', num: 1 }, { suit: 'z', num: 2 }, { suit: 'z', num: 3 },
+  { suit: 'z', num: 4 }, { suit: 'z', num: 5 }, { suit: 'z', num: 6 },
+  { suit: 'z', num: 7 },
+];
+
+function detectKokushiMusou(handTilesRaw, winningTile) {
+  const allTiles = [...handTilesRaw];
+  if (winningTile) allTiles.push(winningTile);
+  if (allTiles.length !== 14) return null;
+
+  const counts = {};
+  for (const t of allTiles) {
+    const k = tileKey(t.suit, t.num);
+    counts[k] = (counts[k] || 0) + 1;
+    if (!KOKUSHI_TILES.some(o => o.suit === t.suit && o.num === t.num)) return null;
+  }
+
+  let presentCount = 0;
+  let pairFound = false;
+  for (const o of KOKUSHI_TILES) {
+    const k = tileKey(o.suit, o.num);
+    const c = counts[k] || 0;
+    if (c === 1) { presentCount++; }
+    else if (c === 2) { presentCount++; pairFound = true; }
+    else if (c > 2) { return null; }
+  }
+
+  if (presentCount !== 13 || !pairFound) return null;
+
+  const waitType = detectKokushiWait(counts, winningTile);
+  return { type: 'kokushi', waitType };
+}
+
+function detectKokushiWait(counts, winningTile) {
+  if (!winningTile) return 'unknown';
+  const k = tileKey(winningTile.suit, winningTile.num);
+  // 和了牌 count>=2: 原本13种各1枚, 和了牌凑成pair → 十三面待ち
+  // 和了牌 count=1: 原本12种(含1对), 等到缺失的第13种 → 単騎待ち
+  if (counts[k] >= 2) return 'juusanmen';
+  return 'tanki';
+}
+
+// ---- 特殊和牌形: 九蓮宝燈 ----
+function detectChuuren(handTilesRaw, winningTile) {
+  const allTiles = [...handTilesRaw];
+  if (winningTile) allTiles.push(winningTile);
+  if (allTiles.length !== 14) return null;
+
+  const suit = allTiles[0].suit;
+  if (suit === 'z') return null;
+  if (!allTiles.every(t => t.suit === suit)) return null;
+
+  const cnt = {};
+  for (const t of allTiles) cnt[t.num] = (cnt[t.num] || 0) + 1;
+
+  // 九蓮形状: 1各≥3, 2-8各≥1, 9各≥3
+  if (cnt[1] < 3 || cnt[9] < 3) return null;
+  for (let n = 2; n <= 8; n++) { if (!cnt[n] || cnt[n] < 1) return null; }
+
+  // 正九蓮 (9面待): 和了牌是超出base的那张
+  const base = { 1: 3, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 3 };
+  let is9sided = false;
+  if (winningTile) {
+    is9sided = cnt[winningTile.num] > (base[winningTile.num] || 0);
+  }
+  return { type: 'chuuren', is9sided };
+}
+
 // ---- 役种检测 ----
 function detectYaku(decomp, params) {
   const { isTsumo, isRiichi, isIppatsu, isMenzen, bakaze, jikaze } = params;
@@ -696,6 +792,21 @@ function detectYaku(decomp, params) {
   const ankou = melds.filter(m => m.type === 'koutsu' && !m.open).length;
   add('三暗刻', 2, ankou >= 3);
 
+  // 三色同刻
+  const koutsuByNum = {};
+  for (const m of melds) {
+    if (m.type !== 'koutsu') continue;
+    const t = m.tiles[0];
+    if (t.suit === 'z') continue;
+    koutsuByNum[t.num] = koutsuByNum[t.num] || new Set();
+    koutsuByNum[t.num].add(t.suit);
+  }
+  add('三色同刻', 2, Object.values(koutsuByNum).some(s => s.size >= 3));
+
+  // 三槓子
+  const kanCount = melds.filter(m => m.isKan).length;
+  add('三槓子', 2, kanCount === 3);
+
   // 三色同顺
   const shuntsuMelds = melds.filter(m => m.type === 'shuntsu');
   let sanshoku = false;
@@ -730,6 +841,17 @@ function detectYaku(decomp, params) {
     }
     const hasIipeikou = Object.values(shuntsuCount).some(c => c >= 2);
     add('一盃口', 1, hasIipeikou);
+
+    // 二盃口: 四组顺子分成两对一盃口
+    if (shuntsuMelds.length === 4) {
+      const sc2 = {};
+      for (const m of shuntsuMelds) {
+        if (m.open) continue;
+        const k = m.tiles[0].suit + '-' + m.tiles[0].num;
+        sc2[k] = (sc2[k] || 0) + 1;
+      }
+      add('二盃口', 3, Object.values(sc2).reduce((s, c) => s + Math.floor(c / 2), 0) >= 2);
+    }
   }
 
   // 混一色
@@ -741,6 +863,26 @@ function detectYaku(decomp, params) {
   // 清一色
   add('清一色', isMenzen ? 6 : 5, suits.size === 1 && !suits.has('z'));
 
+  // 混全帯么九 / 純全帯么九 / 混老頭
+  if (!tanyao) {
+    const allTermHonor = allTiles.every(t => isTermOrHonor(t.suit, t.num));
+    const eachMeldHasTermHonor = melds.every(m =>
+      m.tiles.some(t => isTermOrHonor(t.suit, t.num)));
+    const pairTermHonor = isTermOrHonor(pairTile.suit, pairTile.num);
+
+    if (allTermHonor && eachMeldHasTermHonor && pairTermHonor) {
+      // 混老頭: 全部幺九牌→必然対々和, 4番合计
+      add('混老頭', 2, true);
+    } else if (!hasHonor && pairTermHonor &&
+      melds.every(m => m.tiles.some(t => isTerminal(t.suit, t.num)))) {
+      // 純全帯么九: 无字牌, 每面子含端牌, 雀头端牌
+      add('純全帯么九', isMenzen ? 3 : 2, true);
+    } else if (eachMeldHasTermHonor && pairTermHonor) {
+      // 混全帯么九: 每面子含幺九, 雀头幺九
+      add('混全帯么九', isMenzen ? 2 : 1, true);
+    }
+  }
+
   // 小三元 / 大三元
   let dragonKoutsu = 0;
   for (const m of melds) {
@@ -749,6 +891,39 @@ function detectYaku(decomp, params) {
   const dragonPair = pairTile.suit === 'z' && pairTile.num >= 5;
   if (dragonKoutsu === 3) add('大三元', 13, true);
   else if (dragonKoutsu === 2 && dragonPair) add('小三元', 2, true);
+
+  // ---- 役満 ----
+
+  // 四暗刻: 4组暗刻, 単騎待ち=双倍役満
+  const ankouCount = melds.filter(m => m.type === 'koutsu' && !m.open).length;
+  if (ankouCount === 4) {
+    const wait = detectWait(decomp, params.winningTile);
+    add('四暗刻', wait === 'tanki' ? 26 : 13, true);
+  }
+
+  // 大四喜 / 小四喜
+  const windKoutsu = melds.filter(m =>
+    m.type === 'koutsu' && m.tiles[0].suit === 'z' &&
+    m.tiles[0].num >= 1 && m.tiles[0].num <= 4
+  ).length;
+  const windPair = pairTile.suit === 'z' && pairTile.num >= 1 && pairTile.num <= 4;
+  if (windKoutsu === 4) add('大四喜', 13, true);
+  else if (windKoutsu === 3 && windPair) add('小四喜', 13, true);
+
+  // 字一色
+  add('字一色', 13, suits.size === 1 && suits.has('z'));
+
+  // 清老頭: 全端牌 (无字牌, 无中张)
+  add('清老頭', 13, allTiles.every(t => isTerminal(t.suit, t.num)));
+
+  // 緑一色: 2s/3s/4s/6s/8s/発
+  add('緑一色', 13, allTiles.every(t =>
+    (t.suit === 's' && [2, 3, 4, 6, 8].includes(t.num)) ||
+    (t.suit === 'z' && t.num === 5)
+  ));
+
+  // 四槓子 (三槓子已检测 kanCount===3, 此处 kanCount===4)
+  add('四槓子', 13, kanCount === 4);
 
   return { yaku, totalHan };
 }
@@ -851,7 +1026,9 @@ function detectWait(decomp, winningTile) {
 
 // ---- 点数计算 ----
 function calculatePoints(han, fu, isDealer, isTsumo) {
-  // 满贯以上
+  // 满贯以上 — 含多倍役満
+  if (han >= 39) return manganPlus('三倍役満', 96000, 144000, isDealer, isTsumo);
+  if (han >= 26) return manganPlus('二倍役満', 64000, 96000, isDealer, isTsumo);
   if (han >= 13) return manganPlus('役満', 32000, 48000, isDealer, isTsumo);
   if (han >= 11) return manganPlus('三倍満', 24000, 36000, isDealer, isTsumo);
   if (han >= 8)  return manganPlus('倍満', 16000, 24000, isDealer, isTsumo);
@@ -916,7 +1093,31 @@ function calculate(isTsumo) {
   const hasOpenMeld = meldGroups.some(g => g.type !== 'ankan');
   const isMenzen = !hasOpenMeld;
 
-  const decomps = findAllDecompositionsWithMelds(handTiles.map(t => ({ suit: t.suit, num: t.num })), meldGroups, wt);
+  const handTilesRaw = handTiles.map(t => ({ suit: t.suit, num: t.num }));
+
+  // ---- 特殊和牌形检测 (门清限定) ----
+  // 优先级: 国士(役満) > 九蓮(役満) > 七対子(2番)
+  if (isMenzen && meldGroups.length === 0) {
+    const kokushiResult = detectKokushiMusou(handTilesRaw, wt);
+    if (kokushiResult) {
+      displayKokushiResult(kokushiResult, isTsumo);
+      return;
+    }
+
+    const chuurenResult = detectChuuren(handTilesRaw, wt);
+    if (chuurenResult) {
+      displayChuurenResult(chuurenResult, isTsumo);
+      return;
+    }
+
+    const chiiResult = detectChiitoitsu(handTilesRaw, wt);
+    if (chiiResult) {
+      displayChiitoitsuResult(chiiResult, isTsumo);
+      return;
+    }
+  }
+
+  const decomps = findAllDecompositionsWithMelds(handTilesRaw, meldGroups, wt);
 
   if (decomps.length === 0) {
     displayNoResult('无法组成有效的和牌形（需要4面子+1雀头）');
@@ -962,6 +1163,155 @@ function calculate(isTsumo) {
   }
 
   displayResults(bestResult);
+}
+
+function displayChuurenResult(chuurenResult, isTsumo) {
+  const panel = document.getElementById('result-panel');
+  if (!panel) return;
+  panel.classList.add('show');
+
+  const isDealer = document.querySelector('input[name="oyako"]:checked').value === 'oya';
+  const is9sided = chuurenResult.is9sided;
+  const multiplier = is9sided ? 2 : 1;
+
+  const yl = document.getElementById('yaku-list');
+  if (is9sided) {
+    yl.innerHTML = '<div class="yaku-item"><span class="name">正九蓮宝燈</span><span class="han">ダブル役満</span></div>';
+  } else {
+    yl.innerHTML = '<div class="yaku-item"><span class="name">九蓮宝燈</span><span class="han">役満</span></div>';
+  }
+  document.getElementById('total-han').textContent = is9sided ? '合计: ダブル役満' : '合计: 役満';
+
+  document.getElementById('fu-detail').innerHTML = '<div>役満: 符数不适用</div>';
+
+  const big = document.getElementById('points-big');
+  const detail = document.getElementById('points-detail');
+
+  if (isTsumo) {
+    if (isDealer) {
+      big.textContent = (48000 * multiplier).toLocaleString() + '点';
+      detail.textContent = '親 · ツモ: 各' + (16000 * multiplier).toLocaleString() + '点';
+    } else {
+      big.textContent = (32000 * multiplier).toLocaleString() + '点';
+      detail.textContent = '子 · ツモ: 親' + (16000 * multiplier).toLocaleString() + '点 / 子' + (8000 * multiplier).toLocaleString() + '点';
+    }
+  } else {
+    if (isDealer) {
+      big.textContent = (48000 * multiplier).toLocaleString() + '点';
+      detail.textContent = '親 · ロン: ' + (48000 * multiplier).toLocaleString() + '点';
+    } else {
+      big.textContent = (32000 * multiplier).toLocaleString() + '点';
+      detail.textContent = '子 · ロン: ' + (32000 * multiplier).toLocaleString() + '点';
+    }
+  }
+}
+
+function displayChiitoitsuResult(chiiResult, isTsumo) {
+  const panel = document.getElementById('result-panel');
+  if (!panel) return;
+  panel.classList.add('show');
+
+  const isRiichi = document.getElementById('riichi-flag').checked;
+  const isDoubleRiichi = document.getElementById('double-riichi-flag').checked;
+  const isIppatsu = document.getElementById('ippatsu-flag').checked;
+  const isDealer = document.querySelector('input[name="oyako"]:checked').value === 'oya';
+
+  const yakuList = [];
+  let baseHan = 0;
+  if (isDoubleRiichi) { yakuList.push({ name: '両立直', han: 2 }); baseHan += 2; }
+  else if (isRiichi) { yakuList.push({ name: '立直', han: 1 }); baseHan += 1; }
+  if (isRiichi || isDoubleRiichi) {
+    if (isIppatsu) { yakuList.push({ name: '一発', han: 1 }); baseHan += 1; }
+  }
+  yakuList.push({ name: '七対子', han: 2 }); baseHan += 2;
+  if (isTsumo) { yakuList.push({ name: '門前清自摸和', han: 1 }); baseHan += 1; }
+
+  const allTiles = [...handTiles.map(t => ({ suit: t.suit, num: t.num }))];
+  if (winningTile) allTiles.push({ suit: winningTile.suit, num: winningTile.num });
+  let omoteDoraHan = 0, uraDoraHan = 0;
+  for (const t of allTiles) {
+    if (isOmoteDora(t.suit, t.num)) omoteDoraHan++;
+    if (isUraDora(t.suit, t.num)) uraDoraHan++;
+  }
+  const akadoraCount = handTiles.filter(t => t.isAkadora).length
+    + (winningTile && winningTile.isAkadora ? 1 : 0);
+  const doraHan = omoteDoraHan + uraDoraHan + akadoraCount;
+  const fullHan = baseHan + doraHan;
+
+  const yl = document.getElementById('yaku-list');
+  let yhtml = yakuList.map(y => '<div class="yaku-item"><span class="name">' + y.name + '</span><span class="han">' + y.han + '番</span></div>').join('');
+  if (doraHan > 0) {
+    let doraParts = [];
+    if (omoteDoraHan > 0) doraParts.push('表宝牌 +' + omoteDoraHan + '番');
+    if (uraDoraHan > 0) doraParts.push('裏宝牌 +' + uraDoraHan + '番');
+    if (akadoraCount > 0) doraParts.push('赤宝牌 +' + akadoraCount + '番');
+    yhtml += '<div class="yaku-item"><span class="name">宝牌</span><span class="han">' + doraParts.join(', ') + '</span></div>';
+  }
+  yl.innerHTML = yhtml;
+  document.getElementById('total-han').textContent = '合计: ' + fullHan + '番';
+
+  document.getElementById('fu-detail').innerHTML =
+    '<div>七対子: 25符固定</div><div style="margin-top:6px;font-weight:bold;color:#e8c040">符数合计: 25符</div>';
+
+  const pts = calculatePoints(fullHan, 25, isDealer, isTsumo);
+  const big = document.getElementById('points-big');
+  const detail = document.getElementById('points-detail');
+  if (pts.tsumo !== null) {
+    const total = isDealer ? pts.tsumo * 3 : (pts.tsumoDealer || 0) + pts.tsumo * 2;
+    big.textContent = total.toLocaleString() + '点';
+    detail.textContent = pts.tsumoDetail;
+  } else if (pts.ron !== null) {
+    big.textContent = pts.ron.toLocaleString() + '点';
+    detail.textContent = pts.ronDetail;
+  }
+}
+
+function displayKokushiResult(kResult, isTsumo) {
+  const panel = document.getElementById('result-panel');
+  if (!panel) return;
+  panel.classList.add('show');
+
+  const isDealer = document.querySelector('input[name="oyako"]:checked').value === 'oya';
+  const isJuusanmen = kResult.waitType === 'juusanmen';
+
+  const yl = document.getElementById('yaku-list');
+  if (isJuusanmen) {
+    yl.innerHTML = '<div class="yaku-item"><span class="name">国士無双 十三面待ち</span><span class="han">ダブル役満</span></div>';
+  } else {
+    yl.innerHTML = '<div class="yaku-item"><span class="name">国士無双</span><span class="han">役満</span></div>';
+  }
+  document.getElementById('total-han').textContent = isJuusanmen ? '合计: ダブル役満' : '合计: 役満';
+
+  document.getElementById('fu-detail').innerHTML = '<div>役満: 符数不适用</div>';
+
+  const big = document.getElementById('points-big');
+  const detail = document.getElementById('points-detail');
+  const multiplier = isJuusanmen ? 2 : 1;
+
+  if (isTsumo) {
+    if (isDealer) {
+      const total = 48000 * multiplier;
+      const per = 16000 * multiplier;
+      big.textContent = total.toLocaleString() + '点';
+      detail.textContent = '親 · ツモ: 各' + per.toLocaleString() + '点';
+    } else {
+      const total = 32000 * multiplier;
+      const dPay = 16000 * multiplier;
+      const kPay = 8000 * multiplier;
+      big.textContent = total.toLocaleString() + '点';
+      detail.textContent = '子 · ツモ: 親' + dPay.toLocaleString() + '点 / 子' + kPay.toLocaleString() + '点';
+    }
+  } else {
+    if (isDealer) {
+      const total = 48000 * multiplier;
+      big.textContent = total.toLocaleString() + '点';
+      detail.textContent = '親 · ロン: ' + total.toLocaleString() + '点';
+    } else {
+      const total = 32000 * multiplier;
+      big.textContent = total.toLocaleString() + '点';
+      detail.textContent = '子 · ロン: ' + total.toLocaleString() + '点';
+    }
+  }
 }
 
 function displayNoResult(msg) {
@@ -1031,7 +1381,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   const uraBtn = document.getElementById('ura-dora-mode-btn');
   omoteBtn.classList.remove('active'); omoteBtn.textContent = '選択';
   uraBtn.classList.remove('active'); uraBtn.textContent = '選択';
-  renderHand(); renderMelds(); renderWinningTile(); renderDoraIndicators(); renderUraDoraIndicators(); renderDoraResult(); updateButtonStates();
+  renderHand(); renderMelds(); renderWinningTile(); renderDoraIndicators(); renderUraDoraIndicators(); renderDoraResult(); renderPool(); updateButtonStates();
   const panel = document.getElementById('result-panel');
   if (panel) panel.classList.remove('show');
 });
@@ -1042,10 +1392,10 @@ document.getElementById('btn-ron').addEventListener('click', () => calculate(fal
 // ============ 役种一览悬浮窗 ============
 const YAKU_LIST = [
   { han: '1番', yaku: ['立直', '一発', '門前清自摸和', '平和', '断幺九', '役牌 場風', '役牌 自風', '役牌 白/發/中', '一盃口', '嶺上開花', '海底撈月', '河底撈魚', '搶槓'] },
-  { han: '2番', yaku: ['両立直', '対々和', '三暗刻', '三色同順', '一気通貫', '小三元'] },
-  { han: '3番', yaku: ['混一色'] },
-  { han: '6番', yaku: ['清一色'] },
-  { han: '役満', yaku: ['大三元 (13番)', '天和 (13番)', '地和 (13番)'] },
+  { han: '2番', yaku: ['両立直', '七対子', '対々和', '三暗刻', '三色同順(副露1)', '三色同刻', '一気通貫(副露1)', '三槓子', '混全帯么九(副露1)', '混老頭(対々和合計4)', '小三元'] },
+  { han: '3番', yaku: ['二盃口', '混一色(副露2)', '純全帯么九(副露2)'] },
+  { han: '6番', yaku: ['清一色(副露5)'] },
+  { han: '役満', yaku: ['国士無双', '四暗刻', '大三元', '大四喜', '小四喜', '字一色', '清老頭', '九蓮宝燈', '緑一色', '四槓子', '天和', '地和'] },
   { han: '宝牌', yaku: ['表宝牌 (+1/枚)', '裏宝牌 (+1/枚)', '赤宝牌 (+1/枚)'] },
 ];
 
